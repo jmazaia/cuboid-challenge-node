@@ -1,11 +1,11 @@
-import { Id } from 'objection';
 import HttpStatus from 'http-status-codes';
+import { Id } from 'objection';
 import request from 'supertest';
 
-import app from '../../app';
-import { Bag, Cuboid } from '../../models';
-import factories from '../../factories';
 import urlJoin from 'url-join';
+import app from '../../app';
+import factories from '../../factories';
+import { Bag, Cuboid } from '../../models';
 
 const server = app.listen();
 
@@ -196,9 +196,12 @@ describe('cuboid update', () => {
     );
   });
 
-  it('should succeed to update the cuboid', () => {
+  it('should succeed to update the cuboid', async () => {
     const [newWidth, newHeight, newDepth] = [5, 5, 5];
-    const response = { body: {} as Cuboid, status: HttpStatus.OK };
+    const response = await request(server)
+      .patch(urlJoin('/cuboids', cuboid.id.toString()))
+      .send({ newWidth, newHeight, newDepth });
+
     cuboid = response.body;
 
     expect(response.status).toBe(HttpStatus.OK);

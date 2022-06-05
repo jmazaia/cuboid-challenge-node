@@ -1,6 +1,6 @@
-import { Id, RelationMappings } from 'objection';
-import { Cuboid } from './Cuboid';
+import { Id, ModelOptions, QueryContext, RelationMappings } from 'objection';
 import Base from './Base';
+import { Cuboid } from './Cuboid';
 
 export class Bag extends Base {
   id!: Id;
@@ -23,6 +23,29 @@ export class Bag extends Base {
         },
       },
     };
+  }
+  updateVolume(): void {
+    if (!this.cuboids) {
+      return;
+    }
+    this.payloadVolume = this.cuboids.reduce(
+      (volume: number, cuboid: Cuboid) => volume + cuboid.updateVolume(),
+      0
+    );
+    this.availableVolume = this.volume - this.payloadVolume;
+  }
+
+  async $beforeInsert(queryContext: QueryContext): Promise<void> {
+    await super.$beforeInsert(queryContext);
+    this.updateVolume();
+  }
+
+  async $beforeUpdate(
+    opt: ModelOptions,
+    queryContext: QueryContext
+  ): Promise<void> {
+    await super.$beforeUpdate(opt, queryContext);
+    this.updateVolume();
   }
 }
 
