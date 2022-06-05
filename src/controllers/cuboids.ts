@@ -57,7 +57,7 @@ export const update = async (
 ): Promise<Response> => {
   const { id } = req.params;
 
-  const [newWidth, newHeight, newDepth] = req.body;
+  const { newWidth, newHeight, newDepth } = req.body;
 
   const cuboid = await Cuboid.query().findById(id).withGraphFetched('bag');
 
@@ -82,6 +82,22 @@ export const update = async (
       depth: newDepth,
     })
     .withGraphFetched('bag');
-  console.log(newCuboid);
+
   return res.status(HttpStatus.OK).json(newCuboid);
+};
+
+export const remove = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const { id } = req.params;
+
+  const cuboid = await Cuboid.query().findById(id).withGraphFetched('bag');
+
+  if (!cuboid) {
+    return res.sendStatus(HttpStatus.NOT_FOUND);
+  }
+
+  await cuboid.$query().delete();
+  return res.sendStatus(HttpStatus.OK);
 };
